@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Betawarp Time Travel Calculator</title>
+  <style>
+    body { font-family: sans-serif; background: #101010; color: #f0f0f0; padding: 20px; }
+    input, select { font-size: 1em; padding: 4px; margin: 5px; }
+    .output { margin-top: 20px; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <h1>Betawarp Time Travel Calculator</h1>
+  <label>Enter Speed (βw): </label>
+  <input id="betawarpInput" type="number" step="any" value="1">
+<select id="bwUnit">
+  <option value="1">βw</option>
+  <option value="1e3">Kβw</option>
+  <option value="1e6">Mβw</option>
+  <option value="1e9">Gβw</option>
+  <option value="1e12">Tβw</option>
+  <option value="1e15">Pβw</option>
+  <option value="1e18">Eβw</option>
+  <option value="1e21">Zβw</option>
+  <option value="1e24">Yβw</option>
+</select><br>
+
+  <label>Select Destination:</label>
+  <select id="destination">
+    <option value="4.2">Alpha Centauri (4.2 ly)</option>
+    <option value="27">Vega (27 ly)</option>
+    <option value="1000">Andromeda Core (1,000,000 ly)</option>
+    <option value="2360000">Messier 87 (23,600,000 ly)</option>
+    <option value="1000000000">Edge Galaxy (1,000,000,000 ly)</option>
+  </select>
+
+  <div class="output" id="outputLyHr"></div>
+  <div class="output" id="outputTime"></div>
+  <div class="output" id="outputC"></div>
+
+  <script>
+    function commaSeparate(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function formatTime(seconds) {
+      const units = [
+        { label: 'ys', value: 1e-24 },
+        { label: 'zs', value: 1e-21 },
+        { label: 'as', value: 1e-18 },
+        { label: 'fs', value: 1e-15 },
+        { label: 'ps', value: 1e-12 },
+        { label: 'ns', value: 1e-9 },
+        { label: 'μs', value: 1e-6 },
+        { label: 'ms', value: 1e-3 },
+        { label: 's', value: 1 },
+        { label: 'min', value: 60 },
+        { label: 'hr', value: 3600 },
+        { label: 'day', value: 86400 },
+        { label: 'yr', value: 31557600 }
+      ];
+      let out = "";
+      for (let i = units.length - 1; i >= 0; i--) {
+        if (seconds >= units[i].value) {
+          let v = (seconds / units[i].value).toFixed(4);
+          return commaSeparate(v) + " " + units[i].label;
+        }
+      }
+      return seconds + " s";
+    }
+
+    function applyNamedPrefix(value) {
+      const scales = [
+        { limit: 1e63, symbol: "Tg" },
+        { limit: 1e60, symbol: "Nv" },
+        { limit: 1e57, symbol: "Oc" },
+        { limit: 1e54, symbol: "Sdg" },
+        { limit: 1e51, symbol: "Sxtg" },
+        { limit: 1e48, symbol: "Qnd" },
+        { limit: 1e45, symbol: "Qad" },
+        { limit: 1e42, symbol: "Trd" },
+        { limit: 1e39, symbol: "Ddc" },
+        { limit: 1e36, symbol: "Und" },
+        { limit: 1e33, symbol: "Dg" },
+        { limit: 1e30, symbol: "N" },
+        { limit: 1e27, symbol: "O" },
+        { limit: 1e24, symbol: "Y" },
+        { limit: 1e21, symbol: "Z" },
+        { limit: 1e18, symbol: "E" },
+        { limit: 1e15, symbol: "P" },
+        { limit: 1e12, symbol: "T" },
+        { limit: 1e9,  symbol: "B" }
+      ];
+      for (let i = 0; i < scales.length; i++) {
+        if (Math.abs(value) >= scales[i].limit) {
+          return (value / scales[i].limit).toFixed(4) + " " + scales[i].symbol;
+        }
+      }
+      return commaSeparate(value.toFixed(4));
+    }
+
+    function updateOutput() {
+      const c = 299792.458; // km/s
+      const betawarp = parseFloat(document.getElementById("betawarpInput").value) * parseFloat(document.getElementById("bwUnit").value);
+      const ly = parseFloat(document.getElementById("destination").value);
+      const speed_kmps = betawarp * 6.37e9;
+      const lyPerHr = (speed_kmps * 3600) / 9.461e12;
+      const seconds = (ly * 9.461e12) / (speed_kmps * 1000);
+      const c_multiple = speed_kmps / c;
+
+      document.getElementById("outputLyHr").innerHTML = "Ly/hr: " + applyNamedPrefix(lyPerHr) + " Ly/hr";
+      document.getElementById("outputTime").innerHTML = "Travel Time: " + formatTime(seconds);
+      document.getElementById("outputC").innerHTML = "Speed: " + commaSeparate(c_multiple.toFixed(2)) + " c";
+    }
+
+    document.getElementById("betawarpInput").addEventListener("input", updateOutput);
+    document.getElementById("destination").addEventListener("change", updateOutput);
+    document.getElementById("bwUnit").addEventListener("change", updateOutput);
+    updateOutput();
+  </script>
+</body>
+</html>
